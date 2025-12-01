@@ -1,0 +1,11 @@
+# Ignore artifacts:
+build
+coverage
+node_modules
+.next
+out
+build
+dist
+public
+*.config.js
+pnpm-lock.yaml
