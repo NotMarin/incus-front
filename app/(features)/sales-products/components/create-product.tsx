@@ -103,12 +103,17 @@ export function CreateProduct({ onCreated, product }: CreateProductProps) {
       return;
     }
 
+    if (!product && !imagen) {
+      toast.error("Selecciona una imagen para el producto");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const isEdit = !!product;
       const method = isEdit ? "PUT" : "POST";
-      const url = isEdit
+      const productUrl = isEdit
         ? `http://10.50.50.12:3002/api/productos/${product._id}`
         : "http://10.50.50.12:3002/api/productos";
 
@@ -126,17 +131,30 @@ export function CreateProduct({ onCreated, product }: CreateProductProps) {
         formData.append("imagen", imagen);
       }
 
-      const response = await fetch(url, {
+      const productResponse = await fetch(productUrl, {
         method,
         body: formData,
       });
 
-      const data = await response.json();
+      const productData = await productResponse.json();
 
-      if (!response.ok) {
+      if (!productResponse.ok) {
         throw new Error(
-          data.error || (isEdit ? "No se pudo actualizar" : "No se pudo crear el producto")
+          productData.error || (isEdit ? "No se pudo actualizar" : "No se pudo crear el producto")
         );
+      }
+
+      if (!isEdit && imagen) {
+        const noticiaFormData = new FormData();
+        noticiaFormData.append("nombreProducto", nombre.trim());
+        noticiaFormData.append("descripcionProducto", descripcion.trim());
+        noticiaFormData.append("categoriaProducto", categoria);
+        noticiaFormData.append("imagenProducto", imagen);
+
+        await fetch("http://10.50.50.12:3004/api/noticias", {
+          method: "POST",
+          body: noticiaFormData,
+        });
       }
 
       toast.success(isEdit ? "Producto actualizado" : "Producto creado");
