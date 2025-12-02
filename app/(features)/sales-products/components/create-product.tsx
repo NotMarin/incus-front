@@ -20,12 +20,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus } from "lucide-react";
+import { Edit, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 
 type Product = {
-  id: string;
+  _id: string;
   nombre: string;
   descripcion: string;
   categoria: "electronica" | "libros";
@@ -94,7 +94,7 @@ export function CreateProduct({ onCreated, product }: CreateProductProps) {
       const isEdit = !!product;
       const method = isEdit ? "PUT" : "POST";
       const url = isEdit
-        ? `http://10.50.50.12:3002/api/productos/${product.id}`
+        ? `http://10.50.50.12:3002/api/productos/${product._id}`
         : "http://10.50.50.12:3002/api/productos";
 
       const body = isEdit
@@ -151,7 +151,7 @@ export function CreateProduct({ onCreated, product }: CreateProductProps) {
       <DialogTrigger asChild>
         {product ? (
           <Button variant="ghost" size="icon">
-            <Plus className="size-4" />
+            <Edit className="size-4" />
           </Button>
         ) : (
           <Button>

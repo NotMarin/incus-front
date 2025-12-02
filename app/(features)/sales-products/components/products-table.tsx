@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 
 type Product = {
-  id: string;
+  _id: string;
   nombre: string;
   descripcion: string;
   categoria: "electronica" | "libros";
@@ -101,8 +101,8 @@ function ProductsTable({ data, onCreated }: ProductsTableProps) {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => handleDelete(row.original.id)}
-              disabled={deletingId === row.original.id}
+              onClick={() => handleDelete(row.original._id)}
+              disabled={deletingId === row.original._id}
             >
               <Trash />
             </Button>
