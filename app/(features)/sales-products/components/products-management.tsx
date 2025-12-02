@@ -21,11 +21,14 @@ function ProductsManagement() {
       } else if (data?.productos && Array.isArray(data.productos)) {
         setProducts(data.productos);
       } else if (typeof data === "object" && data !== null && !Array.isArray(data)) {
-        const productsArray = Object.values(data).map((item: any) => ({
-          ...item,
-          _id: item._id,
-        }));
-        setProducts(productsArray as Product[]);
+        const productsArray = Object.values(data).map((item: unknown) => {
+          const product = item as Product;
+          return {
+            ...product,
+            _id: product._id,
+          };
+        });
+        setProducts(productsArray);
       } else {
         setProducts([]);
       }
