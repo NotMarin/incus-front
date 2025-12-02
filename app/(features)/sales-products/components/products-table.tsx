@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type Product = {
   _id: string;
@@ -85,6 +86,26 @@ function ProductsTable({ data, onCreated }: ProductsTableProps) {
       {
         accessorKey: "descripcion",
         header: "Descripción",
+        cell: ({ row }) => {
+          const descripcion = row.getValue<string>("descripcion");
+          const isTruncated = descripcion.length > 40;
+          const displayText = isTruncated ? `${descripcion.substring(0, 40)}...` : descripcion;
+
+          if (isTruncated) {
+            return (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-help">{displayText}</span>
+                  </TooltipTrigger>
+                  <TooltipContent>{descripcion}</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            );
+          }
+
+          return <span>{displayText}</span>;
+        },
       },
       {
         accessorKey: "categoria",
