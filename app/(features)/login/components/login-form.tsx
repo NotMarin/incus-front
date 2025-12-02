@@ -8,6 +8,11 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useState } from "react";
 
+function setCookie(name: string, value: string, days: number) {
+  const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
+  document.cookie = `${name}=${value}; expires=${expires}; path=/`;
+}
+
 export function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -31,11 +36,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
         throw new Error(data.error || "Error en el login");
       }
 
+      setCookie("token", data.token, 1);
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
       toast.success("Sesión iniciada");
       router.push("/dashboard");
+      router.refresh();
     } catch {
       toast.error("No se pudo iniciar sesión");
     } finally {
