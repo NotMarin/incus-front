@@ -20,7 +20,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("http://10.50.50.125:3001/api/auth/register", {
+      const response = await fetch("http://10.50.50.12:3001/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fullName, email, password }),
