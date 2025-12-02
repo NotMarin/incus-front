@@ -22,7 +22,16 @@ import {
 } from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+type Product = {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  categoria: "electronica" | "libros";
+  precio: number;
+  stock: number;
+};
 
 const categoryOptions = [
   { value: "electronica", label: "Electrónica" },
@@ -31,15 +40,33 @@ const categoryOptions = [
 
 type CreateProductProps = {
   onCreated?: () => void;
+  product?: Product | null;
 };
 
-export function CreateProduct({ onCreated }: CreateProductProps) {
+export function CreateProduct({ onCreated, product }: CreateProductProps) {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [precio, setPrecio] = useState("");
   const [categoria, setCategoria] = useState("");
   const [stock, setStock] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (product) {
+      setNombre(product.nombre);
+      setDescripcion(product.descripcion);
+      setPrecio(product.precio.toString());
+      setCategoria(product.categoria);
+      setStock(product.stock.toString());
+    } else {
+      setNombre("");
+      setDescripcion("");
+      setPrecio("");
+      setCategoria("");
+      setStock("");
+    }
+  }, [product, isOpen]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -64,33 +91,55 @@ export function CreateProduct({ onCreated }: CreateProductProps) {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("http://10.50.50.12:3002/api/productos", {
-        method: "POST",
+      const isEdit = !!product;
+      const method = isEdit ? "PUT" : "POST";
+      const url = isEdit
+        ? `http://10.50.50.12:3002/api/productos/${product.id}`
+        : "http://10.50.50.12:3002/api/productos";
+
+      const body = isEdit
+        ? {
+            nombre: nombre.trim(),
+            descripcion: descripcion.trim(),
+            precio: precioValue,
+          }
+        : {
+            nombre: nombre.trim(),
+            descripcion: descripcion.trim(),
+            precio: precioValue,
+            categoria,
+            stock: stockValue,
+          };
+
+      const response = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nombre: nombre.trim(),
-          descripcion: descripcion.trim(),
-          precio: precioValue,
-          categoria,
-          stock: stockValue,
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "No se pudo crear el producto");
+        throw new Error(
+          data.error || (isEdit ? "No se pudo actualizar" : "No se pudo crear el producto")
+        );
       }
 
-      toast.success("Producto creado");
+      toast.success(isEdit ? "Producto actualizado" : "Producto creado");
       setNombre("");
       setDescripcion("");
       setPrecio("");
       setCategoria("");
       setStock("");
+      setIsOpen(false);
       onCreated?.();
-    } catch {
-      const message = "No se pudo crear el producto";
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : product
+            ? "No se pudo actualizar"
+            : "No se pudo crear el producto";
       toast.error(message);
     } finally {
       setIsSubmitting(false);
@@ -98,18 +147,26 @@ export function CreateProduct({ onCreated }: CreateProductProps) {
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Plus />
-          Crear producto
-        </Button>
+        {product ? (
+          <Button variant="ghost" size="icon">
+            <Plus className="size-4" />
+          </Button>
+        ) : (
+          <Button>
+            <Plus />
+            Crear producto
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[460px]">
         <DialogHeader>
-          <DialogTitle>Nuevo producto</DialogTitle>
+          <DialogTitle>{product ? "Editar producto" : "Nuevo producto"}</DialogTitle>
           <DialogDescription>
-            Completa los datos del producto y guárdalos en el inventario.
+            {product
+              ? "Actualiza los datos del producto."
+              : "Completa los datos del producto y guárdalos en el inventario."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -150,43 +207,53 @@ export function CreateProduct({ onCreated }: CreateProductProps) {
               />
               <FieldDescription>Ingresa el precio en tu moneda local.</FieldDescription>
             </Field>
-            <Field className="gap-1">
-              <FieldLabel htmlFor="categoria">Categoría</FieldLabel>
-              <Select value={categoria} onValueChange={(value) => setCategoria(value)} required>
-                <SelectTrigger id="categoria">
-                  <SelectValue placeholder="Selecciona una categoría" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categoryOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FieldDescription>Escoge entre electrónica o libros.</FieldDescription>
-            </Field>
-            <Field className="gap-1">
-              <FieldLabel htmlFor="stock">Stock</FieldLabel>
-              <Input
-                id="stock"
-                type="number"
-                placeholder="15"
-                required
-                value={stock}
-                min="0"
-                step="1"
-                onChange={(event) => setStock(event.target.value)}
-              />
-              <FieldDescription>Unidades disponibles en el inventario.</FieldDescription>
-            </Field>
+            {!product && (
+              <>
+                <Field className="gap-1">
+                  <FieldLabel htmlFor="categoria">Categoría</FieldLabel>
+                  <Select value={categoria} onValueChange={(value) => setCategoria(value)} required>
+                    <SelectTrigger id="categoria">
+                      <SelectValue placeholder="Selecciona una categoría" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categoryOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FieldDescription>Escoge entre electrónica o libros.</FieldDescription>
+                </Field>
+                <Field className="gap-1">
+                  <FieldLabel htmlFor="stock">Stock</FieldLabel>
+                  <Input
+                    id="stock"
+                    type="number"
+                    placeholder="15"
+                    required
+                    value={stock}
+                    min="0"
+                    step="1"
+                    onChange={(event) => setStock(event.target.value)}
+                  />
+                  <FieldDescription>Unidades disponibles en el inventario.</FieldDescription>
+                </Field>
+              </>
+            )}
           </FieldGroup>
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline">Cancelar</Button>
             </DialogClose>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Guardando..." : "Guardar producto"}
+              {isSubmitting
+                ? product
+                  ? "Actualizando..."
+                  : "Guardando..."
+                : product
+                  ? "Actualizar"
+                  : "Guardar producto"}
             </Button>
           </DialogFooter>
         </form>
