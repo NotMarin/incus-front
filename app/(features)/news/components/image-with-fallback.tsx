@@ -10,6 +10,16 @@ export function ImageWithFallback(props: React.ImgHTMLAttributes<HTMLImageElemen
 
   const { src, alt, style, className, ...rest } = props;
 
+  if (!src || typeof src !== "string") {
+    return (
+      <div className={`inline-block bg-gray-100 ${className ?? ""}`} style={style}>
+        <div className="relative flex h-full w-full items-center justify-center">
+          <Image src="/placeholder.svg" alt="No image provided" fill className="object-cover" />
+        </div>
+      </div>
+    );
+  }
+
   return didError ? (
     <div
       className={`inline-block bg-gray-100 text-center align-middle ${className ?? ""}`}
@@ -29,7 +39,7 @@ export function ImageWithFallback(props: React.ImgHTMLAttributes<HTMLImageElemen
     <div className="relative flex h-full w-full items-center justify-center">
       <Image
         fill
-        src={src as string}
+        src={src}
         alt={alt ?? ""}
         className={`object-cover ${className ?? ""}`}
         style={style}

@@ -4,7 +4,7 @@ import { SidebarTrigger } from "./ui/sidebar";
 import { Separator } from "./ui/separator";
 import { usePathname } from "next/navigation";
 
-function NavSIdebarInset() {
+function NavSidebarInset() {
   const pathname = usePathname();
 
   const titleActive = () => {
@@ -13,8 +13,8 @@ function NavSIdebarInset() {
         return "Inicio";
       case "/news":
         return "Noticias";
-      case "/sales":
-        return "Ventas";
+      case "/sales-products":
+        return "Ventas Y Productos";
       case "/administration":
         return "Administración";
       default:
@@ -33,4 +33,4 @@ function NavSIdebarInset() {
   );
 }
 
-export default NavSIdebarInset;
+export default NavSidebarInset;

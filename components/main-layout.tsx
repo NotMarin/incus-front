@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import NavSIdebarInset from "@/components/sidebar-inset";
+import NavSidebarInset from "@/components/sidebar-inset";
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -17,7 +17,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <NavSIdebarInset />
+        <NavSidebarInset />
         <main className="flex flex-1 flex-col overflow-hidden px-6">{children}</main>
       </SidebarInset>
     </SidebarProvider>

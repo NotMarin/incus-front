@@ -25,8 +25,8 @@ const data = {
       icon: Newspaper,
     },
     {
-      name: "Ventas",
-      url: "/sales",
+      name: "Ventas Y Productos",
+      url: "/sales-products",
       icon: BanknoteArrowUp,
     },
     {
