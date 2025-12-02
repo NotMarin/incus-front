@@ -31,6 +31,7 @@ type Product = {
   categoria: "electronica" | "libros";
   precio: number;
   stock: number;
+  imagen?: string;
 };
 
 const categoryOptions = [
@@ -49,6 +50,8 @@ export function CreateProduct({ onCreated, product }: CreateProductProps) {
   const [precio, setPrecio] = useState("");
   const [categoria, setCategoria] = useState("");
   const [stock, setStock] = useState("");
+  const [imagen, setImagen] = useState<File | null>(null);
+  const [imagenPreview, setImagenPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -59,14 +62,26 @@ export function CreateProduct({ onCreated, product }: CreateProductProps) {
       setPrecio(product.precio.toString());
       setCategoria(product.categoria);
       setStock(product.stock.toString());
+      setImagenPreview(product.imagen || null);
+      setImagen(null);
     } else {
       setNombre("");
       setDescripcion("");
       setPrecio("");
       setCategoria("");
       setStock("");
+      setImagen(null);
+      setImagenPreview(null);
     }
   }, [product, isOpen]);
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setImagen(file);
+      setImagenPreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -83,7 +98,7 @@ export function CreateProduct({ onCreated, product }: CreateProductProps) {
       return;
     }
 
-    if (!categoria) {
+    if (!product && !categoria) {
       toast.error("Selecciona una categoría");
       return;
     }
@@ -97,24 +112,23 @@ export function CreateProduct({ onCreated, product }: CreateProductProps) {
         ? `http://10.50.50.12:3002/api/productos/${product._id}`
         : "http://10.50.50.12:3002/api/productos";
 
-      const body = isEdit
-        ? {
-            nombre: nombre.trim(),
-            descripcion: descripcion.trim(),
-            precio: precioValue,
-          }
-        : {
-            nombre: nombre.trim(),
-            descripcion: descripcion.trim(),
-            precio: precioValue,
-            categoria,
-            stock: stockValue,
-          };
+      const formData = new FormData();
+      formData.append("nombre", nombre.trim());
+      formData.append("descripcion", descripcion.trim());
+      formData.append("precio", precioValue.toString());
+      formData.append("stock", stockValue.toString());
+
+      if (!isEdit) {
+        formData.append("categoria", categoria);
+      }
+
+      if (imagen) {
+        formData.append("imagen", imagen);
+      }
 
       const response = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: formData,
       });
 
       const data = await response.json();
@@ -131,6 +145,8 @@ export function CreateProduct({ onCreated, product }: CreateProductProps) {
       setPrecio("");
       setCategoria("");
       setStock("");
+      setImagen(null);
+      setImagenPreview(null);
       setIsOpen(false);
       onCreated?.();
     } catch (error) {
@@ -207,39 +223,56 @@ export function CreateProduct({ onCreated, product }: CreateProductProps) {
               />
               <FieldDescription>Ingresa el precio en tu moneda local.</FieldDescription>
             </Field>
-            {!product && (
-              <>
-                <Field className="gap-1">
-                  <FieldLabel htmlFor="categoria">Categoría</FieldLabel>
-                  <Select value={categoria} onValueChange={(value) => setCategoria(value)} required>
-                    <SelectTrigger id="categoria">
-                      <SelectValue placeholder="Selecciona una categoría" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categoryOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FieldDescription>Escoge entre electrónica o libros.</FieldDescription>
-                </Field>
-                <Field className="gap-1">
-                  <FieldLabel htmlFor="stock">Stock</FieldLabel>
-                  <Input
-                    id="stock"
-                    type="number"
-                    placeholder="15"
-                    required
-                    value={stock}
-                    min="0"
-                    step="1"
-                    onChange={(event) => setStock(event.target.value)}
+            <Field className="gap-1">
+              <FieldLabel htmlFor="stock">Stock</FieldLabel>
+              <Input
+                id="stock"
+                type="number"
+                placeholder="15"
+                required
+                value={stock}
+                min="0"
+                step="1"
+                onChange={(event) => setStock(event.target.value)}
+              />
+              <FieldDescription>Unidades disponibles en el inventario.</FieldDescription>
+            </Field>
+            <Field className="gap-1">
+              <FieldLabel htmlFor="imagen">Imagen del producto</FieldLabel>
+              <Input
+                id="imagen"
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                onChange={handleImageChange}
+              />
+              {imagenPreview && (
+                <div className="mt-2">
+                  <img
+                    src={imagenPreview}
+                    alt="Preview"
+                    className="h-24 w-24 rounded-md object-cover"
                   />
-                  <FieldDescription>Unidades disponibles en el inventario.</FieldDescription>
-                </Field>
-              </>
+                </div>
+              )}
+              <FieldDescription>Formatos: JPEG, PNG, GIF, WebP. Máx 5MB.</FieldDescription>
+            </Field>
+            {!product && (
+              <Field className="gap-1">
+                <FieldLabel htmlFor="categoria">Categoría</FieldLabel>
+                <Select value={categoria} onValueChange={(value) => setCategoria(value)} required>
+                  <SelectTrigger id="categoria">
+                    <SelectValue placeholder="Selecciona una categoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoryOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FieldDescription>Escoge entre electrónica o libros.</FieldDescription>
+              </Field>
             )}
           </FieldGroup>
           <DialogFooter>

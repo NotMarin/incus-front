@@ -23,6 +23,7 @@ type Product = {
   categoria: "electronica" | "libros";
   precio: number;
   stock: number;
+  imagen?: string;
 };
 
 export type { Product };
@@ -59,6 +60,24 @@ function ProductsTable({ data, onCreated }: ProductsTableProps) {
 
   const columns: ColumnDef<Product>[] = useMemo(
     () => [
+      {
+        accessorKey: "imagen",
+        header: "Imagen",
+        cell: ({ row }) => {
+          const imagen = row.getValue<string>("imagen");
+          return imagen ? (
+            <img
+              src={imagen}
+              alt={row.getValue("nombre")}
+              className="h-10 w-10 rounded-md object-cover"
+            />
+          ) : (
+            <div className="bg-muted text-muted-foreground flex h-10 w-10 items-center justify-center rounded-md text-xs">
+              N/A
+            </div>
+          );
+        },
+      },
       {
         accessorKey: "nombre",
         header: "Nombre",
