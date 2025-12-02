@@ -4,13 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import { NewsCategory, NewsArticle, categoryLabels } from "./types";
 import { FeaturedNews } from "./components/featured-news";
 import { NewsCard } from "./components/news-card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const API_BASE = "http://10.50.50.12:3004/api/noticias";
@@ -18,7 +11,7 @@ const API_BASE = "http://10.50.50.12:3004/api/noticias";
 function NewsPage() {
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [category, setCategory] = useState<string>(NewsCategory.ALL);
+  const [category, _setCategory] = useState<string>(NewsCategory.ALL);
 
   const fetchNews = useCallback(async () => {
     setIsLoading(true);
@@ -43,22 +36,6 @@ function NewsPage() {
 
   return (
     <div className="min-h-screen space-y-4 py-4">
-      <div className="flex items-center justify-between">
-        <h2>Noticias</h2>
-        <Select value={category} onValueChange={setCategory}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Categoría" />
-          </SelectTrigger>
-          <SelectContent>
-            {Object.entries(categoryLabels).map(([value, label]) => (
-              <SelectItem key={value} value={value}>
-                {label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
       {isLoading ? (
         <div className="space-y-4">
           <Skeleton className="h-64 w-full rounded-lg" />
