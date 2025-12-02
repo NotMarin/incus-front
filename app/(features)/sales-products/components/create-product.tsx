@@ -176,7 +176,7 @@ export function CreateProduct({ onCreated, product }: CreateProductProps) {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[460px]">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[680px]">
         <DialogHeader>
           <DialogTitle>{product ? "Editar producto" : "Nuevo producto"}</DialogTitle>
           <DialogDescription>
@@ -186,7 +186,7 @@ export function CreateProduct({ onCreated, product }: CreateProductProps) {
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <FieldGroup className="gap-4">
+          <FieldGroup className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field className="gap-1">
               <FieldLabel htmlFor="nombre">Nombre del producto</FieldLabel>
               <Input
@@ -237,7 +237,7 @@ export function CreateProduct({ onCreated, product }: CreateProductProps) {
               />
               <FieldDescription>Unidades disponibles en el inventario.</FieldDescription>
             </Field>
-            <Field className="gap-1">
+            <Field className="gap-1 md:col-span-2">
               <FieldLabel htmlFor="imagen">Imagen del producto</FieldLabel>
               <Input
                 id="imagen"
@@ -257,7 +257,7 @@ export function CreateProduct({ onCreated, product }: CreateProductProps) {
               <FieldDescription>Formatos: JPEG, PNG, GIF, WebP. Máx 5MB.</FieldDescription>
             </Field>
             {!product && (
-              <Field className="gap-1">
+              <Field className="gap-1 md:col-span-2">
                 <FieldLabel htmlFor="categoria">Categoría</FieldLabel>
                 <Select value={categoria} onValueChange={(value) => setCategoria(value)} required>
                   <SelectTrigger id="categoria">
@@ -275,7 +275,7 @@ export function CreateProduct({ onCreated, product }: CreateProductProps) {
               </Field>
             )}
           </FieldGroup>
-          <DialogFooter>
+          <DialogFooter className="bg-background sticky bottom-0 pt-4">
             <DialogClose asChild>
               <Button variant="outline">Cancelar</Button>
             </DialogClose>
