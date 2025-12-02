@@ -1,6 +1,6 @@
 "use client";
 
-import { BanknoteArrowUp, LayoutDashboard, Newspaper, UserStar } from "lucide-react";
+import { BanknoteArrowUp, LayoutDashboard, Newspaper } from "lucide-react";
 
 import {
   Sidebar,

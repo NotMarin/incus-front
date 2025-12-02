@@ -24,6 +24,8 @@ export default function SignupPage() {
           src="/signup-image.webp"
           alt="Image"
           className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+          priority
+          unoptimized
         />
       </div>
     </div>
