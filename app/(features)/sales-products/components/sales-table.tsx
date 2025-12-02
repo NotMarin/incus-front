@@ -3,75 +3,67 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/data-table";
 import { ColumnDef } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { CreateSale } from "./create-sale";
+import { useMemo } from "react";
 
 type Sale = {
-  id: string;
-  code: string;
-  date: string;
-  product: string;
-  client: string;
-  quantity: number;
-  totalValue: number;
+  _id: string;
+  codigo: string;
+  fecha: string;
+  productoNombre: string;
+  productoCategoria: string;
+  cliente: string;
+  cantidad: number;
+  precioUnitario: number;
+  valorTotal: number;
 };
 
-const salesData: Sale[] = [
-  {
-    id: "1",
-    code: "V-001",
-    date: "2024-12-01",
-    product: "Laptop Gamer X",
-    client: "Juan Pérez",
-    quantity: 1,
-    totalValue: 1500.0,
-  },
-  {
-    id: "2",
-    code: "V-002",
-    date: "2024-11-30",
-    product: "Monitor 4K",
-    client: "Ana Gómez",
-    quantity: 2,
-    totalValue: 800.0,
-  },
-  {
-    id: "3",
-    code: "V-003",
-    date: "2024-11-29",
-    product: "Teclado Mecánico",
-    client: "Carlos Ruiz",
-    quantity: 5,
-    totalValue: 500.0,
-  },
-];
+export type { Sale };
+
+type SalesTableProps = {
+  data: Sale[];
+  onCreated?: () => void;
+};
 
 const columns: ColumnDef<Sale>[] = [
   {
-    accessorKey: "code",
+    accessorKey: "codigo",
     header: "Código",
   },
   {
-    accessorKey: "date",
+    accessorKey: "fecha",
     header: "Fecha",
+    cell: ({ row }) => {
+      const date = new Date(row.getValue("fecha"));
+      return <div>{date.toLocaleDateString("es-CO")}</div>;
+    },
   },
   {
-    accessorKey: "product",
+    accessorKey: "productoNombre",
     header: "Producto",
   },
   {
-    accessorKey: "client",
+    accessorKey: "productoCategoria",
+    header: "Categoría",
+    cell: ({ row }) => {
+      const category = row.getValue<string>("productoCategoria");
+      const label = category === "electronica" ? "Electrónica" : "Libros";
+      return <div className="font-medium">{label}</div>;
+    },
+  },
+  {
+    accessorKey: "cliente",
     header: "Cliente",
   },
   {
-    accessorKey: "quantity",
+    accessorKey: "cantidad",
     header: "Cantidad",
   },
   {
-    accessorKey: "totalValue",
+    accessorKey: "valorTotal",
     header: "Valor Total",
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("totalValue"));
+      const amount = Number(row.getValue("valorTotal"));
       const formatted = new Intl.NumberFormat("es-CO", {
         style: "currency",
         currency: "COP",
@@ -81,23 +73,20 @@ const columns: ColumnDef<Sale>[] = [
   },
 ];
 
-function SalesTable() {
+function SalesTable({ data, onCreated }: SalesTableProps) {
   return (
     <Card className="@container/card">
-      <CardHeader className="flex justify-between">
+      <CardHeader className="flex flex-row items-center justify-between gap-4">
         <div>
           <CardTitle>Tabla de ventas</CardTitle>
           <CardDescription>
-            <span className="hidden @[540px]/card:block">Ventas en los últimos 3 meses</span>
+            <span className="hidden @[540px]/card:block">Historial de ventas</span>
           </CardDescription>
         </div>
-        <Button>
-          <Plus />
-          Nueva venta
-        </Button>
+        <CreateSale onCreated={onCreated} />
       </CardHeader>
       <CardContent>
-        <DataTable columns={columns} data={salesData} />
+        <DataTable columns={columns} data={data} />
       </CardContent>
     </Card>
   );
