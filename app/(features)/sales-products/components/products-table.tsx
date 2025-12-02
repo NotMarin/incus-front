@@ -1,65 +1,54 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Edit, Trash } from "lucide-react";
+import { CreateProduct } from "./create-product";
+import { useMemo, useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Product = {
   id: string;
-  name: string;
-  description: string;
-  category: "Electronica" | "Libro";
-  price: number;
+  nombre: string;
+  descripcion: string;
+  categoria: "electronica" | "libros";
+  precio: number;
   stock: number;
 };
 
-const productsData: Product[] = [
-  {
-    id: "1",
-    name: "Laptop Gamer X",
-    description: "Potente laptop para juegos",
-    category: "Electronica",
-    price: 1500.0,
-    stock: 10,
-  },
-  {
-    id: "2",
-    name: "El Señor de los Anillos",
-    description: "Trilogía completa",
-    category: "Libro",
-    price: 50.0,
-    stock: 100,
-  },
-  {
-    id: "3",
-    name: "Monitor 4K",
-    description: "Monitor de alta resolución",
-    category: "Electronica",
-    price: 400.0,
-    stock: 25,
-  },
-];
+export type { Product };
 
 const columns: ColumnDef<Product>[] = [
   {
-    accessorKey: "name",
+    accessorKey: "nombre",
     header: "Nombre",
   },
   {
-    accessorKey: "description",
+    accessorKey: "descripcion",
     header: "Descripción",
   },
   {
-    accessorKey: "category",
+    accessorKey: "categoria",
     header: "Categoría",
+    cell: ({ row }) => {
+      const category = row.getValue<Product["categoria"]>("categoria");
+      const label = category === "electronica" ? "Electrónica" : "Libros";
+      return <div className="font-medium">{label}</div>;
+    },
   },
   {
-    accessorKey: "price",
+    accessorKey: "precio",
     header: "Precio",
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("price"));
+      const amount = Number(row.getValue("precio"));
       const formatted = new Intl.NumberFormat("es-CO", {
         style: "currency",
         currency: "COP",
@@ -71,25 +60,63 @@ const columns: ColumnDef<Product>[] = [
     accessorKey: "stock",
     header: "Stock",
   },
+  {
+    id: "actions",
+    header: "",
+    cell: () => (
+      <div className="flex justify-end gap-2">
+        <Button variant="ghost" size="icon">
+          <Edit />
+        </Button>
+        <Button variant="ghost" size="icon">
+          <Trash />
+        </Button>
+      </div>
+    ),
+  },
 ];
 
-function ProductsTable() {
+function ProductsTable({ data }: { data: Product[] }) {
+  const [categoryFilter, setCategoryFilter] = useState<"todos" | "electronica" | "libros">("todos");
+
+  const filteredData = useMemo(() => {
+    if (categoryFilter === "todos") {
+      return data;
+    }
+
+    return data.filter((product) => product.categoria === categoryFilter);
+  }, [categoryFilter, data]);
+
   return (
     <Card className="@container/card">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Tabla de productos</CardTitle>
-          <CardDescription>
-            <span className="hidden @[540px]/card:block">Gestión de inventario</span>
-          </CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-5">
+          <div>
+            <CardTitle>Tabla de productos</CardTitle>
+            <CardDescription>
+              <span className="hidden @[540px]/card:block">Gestión de inventario</span>
+            </CardDescription>
+          </div>
+          <Select
+            value={categoryFilter}
+            onValueChange={(value) =>
+              setCategoryFilter(value as "todos" | "electronica" | "libros")
+            }
+          >
+            <SelectTrigger className="min-w-[120px]">
+              <SelectValue placeholder="Filtrar" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              <SelectItem value="electronica">Electrónica</SelectItem>
+              <SelectItem value="libros">Libros</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <Button>
-          <Plus />
-          Nuevo producto
-        </Button>
+        <CreateProduct />
       </CardHeader>
       <CardContent>
-        <DataTable columns={columns} data={productsData} />
+        <DataTable columns={columns} data={filteredData} />
       </CardContent>
     </Card>
   );
