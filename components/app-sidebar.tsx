@@ -29,11 +29,6 @@ const data = {
       url: "/sales-products",
       icon: BanknoteArrowUp,
     },
-    {
-      name: "Administración",
-      url: "/administration",
-      icon: UserStar,
-    },
   ],
 };
 
