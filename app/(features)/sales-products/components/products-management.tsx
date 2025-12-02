@@ -7,35 +7,30 @@ import SectionCardsProducts from "./section-cards-products";
 function ProductsManagement() {
   const [products, setProducts] = useState<Product[]>([]);
 
-  useEffect(() => {
-    let canceled = false;
-
-    const loadProducts = async () => {
-      try {
-        const response = await fetch("http://10.50.50.12:3002/api/productos");
-        if (!response.ok) {
-          throw new Error("No se pudo cargar el inventario");
-        }
-
-        const data = await response.json();
-        if (canceled) return;
-
-        if (Array.isArray(data)) {
-          setProducts(data);
-        } else {
-          setProducts([]);
-        }
-      } catch (error) {
-        setProducts([]);
-        console.error(error);
+  const loadProducts = async () => {
+    try {
+      const response = await fetch("http://10.50.50.12:3002/api/productos");
+      if (!response.ok) {
+        throw new Error("No se pudo cargar el inventario");
       }
-    };
 
+      const data = await response.json();
+
+      if (Array.isArray(data)) {
+        setProducts(data);
+      } else if (data?.productos && Array.isArray(data.productos)) {
+        setProducts(data.productos);
+      } else {
+        setProducts([]);
+      }
+    } catch (error) {
+      setProducts([]);
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
     loadProducts();
-
-    return () => {
-      canceled = true;
-    };
   }, []);
 
   const { totalProducts, totalStock } = useMemo(() => {
@@ -52,7 +47,7 @@ function ProductsManagement() {
         <div className="flex flex-col gap-4 md:gap-6">
           <SectionCardsProducts totalProducts={totalProducts} totalStock={totalStock} />
           <div>
-            <ProductsTable data={products} />
+            <ProductsTable data={products} onCreated={loadProducts} />
           </div>
         </div>
       </div>

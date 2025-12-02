@@ -29,7 +29,11 @@ const categoryOptions = [
   { value: "libros", label: "Libros" },
 ];
 
-export function CreateProduct() {
+type CreateProductProps = {
+  onCreated?: () => void;
+};
+
+export function CreateProduct({ onCreated }: CreateProductProps) {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [precio, setPrecio] = useState("");
@@ -84,6 +88,7 @@ export function CreateProduct() {
       setPrecio("");
       setCategoria("");
       setStock("");
+      onCreated?.();
     } catch {
       const message = "No se pudo crear el producto";
       toast.error(message);

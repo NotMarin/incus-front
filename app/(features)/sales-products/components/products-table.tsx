@@ -76,7 +76,12 @@ const columns: ColumnDef<Product>[] = [
   },
 ];
 
-function ProductsTable({ data }: { data: Product[] }) {
+type ProductsTableProps = {
+  data: Product[];
+  onCreated?: () => void;
+};
+
+function ProductsTable({ data, onCreated }: ProductsTableProps) {
   const [categoryFilter, setCategoryFilter] = useState<"todos" | "electronica" | "libros">("todos");
 
   const filteredData = useMemo(() => {
@@ -113,7 +118,7 @@ function ProductsTable({ data }: { data: Product[] }) {
             </SelectContent>
           </Select>
         </div>
-        <CreateProduct />
+        <CreateProduct onCreated={onCreated} />
       </CardHeader>
       <CardContent>
         <DataTable columns={columns} data={filteredData} />
